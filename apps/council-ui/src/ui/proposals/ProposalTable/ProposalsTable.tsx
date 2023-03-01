@@ -3,12 +3,15 @@ import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
 import Link from "next/link";
 import { ReactElement, useMemo, useState } from "react";
+import { formatTimeLeft } from "src/dates/formatTimeLeft";
 import { ProposalStatus } from "src/proposals/getProposalStatus";
 import { makeProposalURL } from "src/routes";
 import {
   SortableGridTable,
   SortOptions,
 } from "src/ui/base/tables/SortableGridTable";
+import { Tooltip } from "src/ui/base/Tooltip/Tooltip";
+import { tooltipByStatus } from "src/ui/proposals/tooltips";
 import FormattedBallot from "src/ui/voting/FormattedBallot";
 import { useAccount } from "wagmi";
 
@@ -85,7 +88,7 @@ export function ProposalsTable({ rowData }: ProposalsTableProps): ReactElement {
                   )}
                 </span>,
 
-                votingEnds?.toLocaleDateString() ?? <em>unknown</em>,
+                votingEnds ? formatTimeLeft(votingEnds) : <em>unknown</em>,
 
                 <StatusBadge key={`${id}-status`} status={status} />,
 
@@ -196,15 +199,17 @@ function sortProposalRowData(
 
 function StatusBadge({ status }: { status: ProposalStatus }) {
   return (
-    <div
-      className={classNames("font-bold daisy-badge", {
-        "daisy-badge-error": status === "FAILED",
-        "daisy-badge-info": status === "IN PROGRESS",
-        "daisy-badge-success": status === "EXECUTED",
-        "daisy-badge-warning": status === "EXPIRED",
-      })}
-    >
-      {status}
-    </div>
+    <Tooltip content={tooltipByStatus[status]}>
+      <div
+        className={classNames("font-bold daisy-badge", {
+          "daisy-badge-error": status === "FAILED",
+          "daisy-badge-info": status === "IN PROGRESS",
+          "daisy-badge-success": status === "EXECUTED",
+          "daisy-badge-warning": status === "EXPIRED",
+        })}
+      >
+        {status}
+      </div>
+    </Tooltip>
   );
 }
